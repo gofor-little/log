@@ -247,13 +247,13 @@ func (c *CloudWatchLogger) queueLog(level string, fields Fields) error {
 		return err
 	}
 
-	if c.logEventsList.IsEmpty() || !c.logEventsList.GetTail().(*CloudWatchLogEventList).CanAdd(data) {
+	if c.logEventsList.IsEmpty() || !c.logEventsList.GetTail().(*CloudWatchLogEventList).canAdd(data) {
 		c.logEventsList.Push(&CloudWatchLogEventList{})
 	}
 
 	tail := c.logEventsList.GetTail().(*CloudWatchLogEventList)
 
-	if err := tail.Add(string(data)); err != nil {
+	if err := tail.add(string(data)); err != nil {
 		return err
 	}
 

@@ -23,9 +23,9 @@ type CloudWatchLogEventList struct {
 	size      int
 }
 
-// Add adds a new InputLogEvent to the logEvents slice.
-func (c *CloudWatchLogEventList) Add(message string) error {
-	if c.IsFull() || c.size+len(message)+inputLogEventOffset > maxBatchInputLogEventSize {
+// add adds a new InputLogEvent to the logEvents slice.
+func (c *CloudWatchLogEventList) add(message string) error {
+	if c.isFull() || c.size+len(message)+inputLogEventOffset > maxBatchInputLogEventSize {
 		return fmt.Errorf("max put size of %v exceeded", maxBatchInputLogEventSize)
 	}
 
@@ -49,19 +49,19 @@ func (c *CloudWatchLogEventList) Add(message string) error {
 	return nil
 }
 
-// CanAdd checks if message can be added to the logEvents slice
+// canAdd checks if message can be added to the logEvents slice
 // by first checking if size will still be less than maxBatchInputLogEventSize
 // with message being appended.
-func (c *CloudWatchLogEventList) CanAdd(message []byte) bool {
-	if c.IsFull() || c.size+len(message)+inputLogEventOffset > maxBatchInputLogEventSize {
+func (c *CloudWatchLogEventList) canAdd(message []byte) bool {
+	if c.isFull() || c.size+len(message)+inputLogEventOffset > maxBatchInputLogEventSize {
 		return false
 	}
 
 	return true
 }
 
-// IsFull checks if size is greater than or equal to maxBatchInputLogEventSize.
-func (c *CloudWatchLogEventList) IsFull() bool {
+// isFull checks if size is greater than or equal to maxBatchInputLogEventSize.
+func (c *CloudWatchLogEventList) isFull() bool {
 	if c.logEvents == nil {
 		c.logEvents = &ts.Slice{}
 	}
