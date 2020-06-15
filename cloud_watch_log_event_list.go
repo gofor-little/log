@@ -6,7 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatchlogs"
-	"github.com/taliesinmillhouse/little-experiments/ts"
+	"github.com/gofor-little/ts"
 )
 
 const (
