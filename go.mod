@@ -1,4 +1,4 @@
-module github.com/gofor-little/logger
+module github.com/gofor-little/log
 
 go 1.13
 

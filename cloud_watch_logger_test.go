@@ -1,4 +1,4 @@
-package logger_test
+package log_test
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 
-	log "github.com/gofor-little/logger"
+	"github.com/gofor-little/log"
 )
 
 func TestCloudWatchLogger(t *testing.T) {
@@ -27,7 +27,7 @@ func TestCloudWatchLogger(t *testing.T) {
 		t.Fatalf("failed to create new CloudWatchLogger: %v", err)
 	}
 
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 100; i++ {
 		if err := log.Info(log.Fields{
 			"message": fmt.Sprintf("test info message number: %v", i),
 		}); err != nil {
