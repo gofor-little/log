@@ -12,12 +12,13 @@
 *.out
 
 # Text editors/IDEs
-.vscode
+.vscode/
 __debug_bin
-.idea
+.idea/
 
 # Directories.
-dist
+bin/
+dist/
 
-# Env files
+# Env files.
 *.env
