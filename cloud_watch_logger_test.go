@@ -2,6 +2,7 @@ package log_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -65,4 +66,6 @@ func TestCloudWatchLogger(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("failed to write Debug log message")
 	}
+
+	time.Sleep(time.Second)
 }
