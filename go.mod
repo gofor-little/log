@@ -5,5 +5,5 @@ go 1.15
 require (
 	github.com/aws/aws-sdk-go v1.36.18
 	github.com/gofor-little/env v0.4.3
-	github.com/gofor-little/ts v0.1.0
+	github.com/gofor-little/ts v0.2.1
 )

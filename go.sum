@@ -1,11 +1,12 @@
+
 github.com/aws/aws-sdk-go v1.36.18 h1:PvfZkE0cjM1k1EMQDSb2BrX8LETPx0IFFZ/YKkurmFg=
 github.com/aws/aws-sdk-go v1.36.18/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/gofor-little/env v0.4.3 h1:FqtZmTzUxju/DBSSv/m/3noBt10pdU+7695XgHJtaoo=
 github.com/gofor-little/env v0.4.3/go.mod h1:aPkmDX9t/3zhViWDnhNH8RtlSbSOoZ9dmKbUo12tnN8=
-github.com/gofor-little/ts v0.1.0 h1:40dDLxNORHXzETnKmRhm7YrzU1p7S79sClFSJMAB4PQ=
-github.com/gofor-little/ts v0.1.0/go.mod h1:ZT8fzifgCAHMch+P88ViTj9Tgke/rHIDsl3LN7g/zFE=
+github.com/gofor-little/ts v0.2.1 h1:l43jL9464k3eLplyNmWtO4LTtuf42xXnIK1scMANZXI=
+github.com/gofor-little/ts v0.2.1/go.mod h1:80EMTIfnZucUlZHXUbPo7QfWeH6SG05AObgNW4dJUo0=
 github.com/jmespath/go-jmespath v0.4.0 h1:BEgLn5cpjn8UN1mAw4NjwDrS35OdebyEtFe+9YPoQUg=
 github.com/jmespath/go-jmespath v0.4.0/go.mod h1:T8mJZnbsbmF+m6zOOFylbeCJqk5+pHWvzYPziyZiYoo=
 github.com/jmespath/go-jmespath/internal/testify v1.5.1 h1:shLQSRRSCCPj3f2gpwzGwWFoC7ycTf1rcQZHOlsJ6N8=
