@@ -18,7 +18,7 @@ func TestCloudWatchLogger(t *testing.T) {
 		t.Log(".env file not found, ignore this if running in CI/CD Pipeline")
 	}
 
-	if env.Get("ENVIRONMENT", "development") == "development" {
+	if env.Get("ENVIRONMENT", "ci/cd") == "development" {
 		sess, err = session.NewSessionWithOptions(session.Options{
 			Config: aws.Config{
 				Region: aws.String(env.Get("AWS_REGION", "ap-southeast-2")),
