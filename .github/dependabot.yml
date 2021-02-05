@@ -5,4 +5,5 @@ updates:
   schedule:
     interval: daily
     time: "17:00"
+  target-branch: develop
   open-pull-requests-limit: 10

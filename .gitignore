@@ -1,24 +1,25 @@
-# Binaries for programs and plugins
+# Binaries for programs and plugins.
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
 
-# Test binary, built with `go test -c`
+# Test binary, built with `go test -c`.
 *.test
 
-# Output of the go coverage tool, specifically when used with LiteIDE
+# Output of the go coverage tool, specifically when used with LiteIDE.
 *.out
 
-# Text editors/IDEs
-.vscode/
+# Text editors/IDEs.
 __debug_bin
+.vscode/
 .idea/
 
 # Directories.
 bin/
 dist/
+node_modules/
 
 # Env files.
 *.env
