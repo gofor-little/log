@@ -188,7 +188,7 @@ func (c *CloudWatchLogger) putLogs() error {
 		return err
 	}
 
-	elements := c.logEventsList.Pop().(*CloudWatchLogEventList).logEvents.Elements
+	elements := c.logEventsList.Pop().(*CloudWatchLogEventList).logEvents.GetElements()
 	inputLogEvents := make([]*cloudwatchlogs.InputLogEvent, len(elements))
 
 	for index, value := range elements {
@@ -207,6 +207,7 @@ func (c *CloudWatchLogger) putLogs() error {
 	}
 
 	output, err := c.cloudWatchLogs.PutLogEvents(input)
+
 	if err != nil {
 		var expectedSequenceToken *string
 
@@ -220,6 +221,7 @@ func (c *CloudWatchLogger) putLogs() error {
 			input.SequenceToken = expectedSequenceToken
 
 			output, err = c.cloudWatchLogs.PutLogEvents(input)
+
 			if err != nil {
 				return err
 			}
@@ -247,11 +249,14 @@ func (c *CloudWatchLogger) queueLog(level string, fields Fields) error {
 		return err
 	}
 
-	if c.logEventsList.IsEmpty() || !c.logEventsList.GetTail().(*CloudWatchLogEventList).canAdd(data) {
-		c.logEventsList.Push(&CloudWatchLogEventList{})
-	}
+	var tail *CloudWatchLogEventList
 
-	tail := c.logEventsList.GetTail().(*CloudWatchLogEventList)
+	if c.logEventsList.IsEmpty() || !c.logEventsList.GetTail().(*CloudWatchLogEventList).canAdd(data) {
+		tail = &CloudWatchLogEventList{}
+		c.logEventsList.Push(&CloudWatchLogEventList{})
+	} else {
+		tail = c.logEventsList.GetTail().(*CloudWatchLogEventList)
+	}
 
 	if err := tail.add(string(data)); err != nil {
 		return err
