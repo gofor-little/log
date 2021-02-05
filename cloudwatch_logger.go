@@ -3,6 +3,7 @@ package log
 import (
 	"encoding/json"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -19,6 +20,7 @@ type CloudWatchLogger struct {
 	logGroupName      *string
 	nextSequenceToken *string
 	globalFields      Fields
+	mutex             sync.RWMutex
 }
 
 // NewCloudWatchLogger initializes a new CloudWatchLogger object and returns it.
@@ -78,6 +80,117 @@ func (c *CloudWatchLogger) createLogGroup() error {
 
 	_, err := c.cloudWatchLogs.CreateLogGroup(input)
 	return err
+}
+
+// queue combines the globalFields and the passed fields, then
+// marshals them to JSON and finally adds it to a thread safe queue.
+func (c *CloudWatchLogger) queueLog(level string, fields Fields) error {
+	for key, value := range c.globalFields {
+		fields[key] = value
+	}
+
+	fields["level"] = level
+
+	data, err := json.Marshal(fields)
+	if err != nil {
+		return err
+	}
+
+	messages := [][]byte{}
+
+	// Check if the data is larger than the max input log event size.
+	// If so, split it into a slice so the data can be added over multiple
+	// events. This may break the JSON structure of very large amounts of
+	// data as it will be split between multiple log events.
+	for {
+		if len(data) <= maxInputLogEventSize {
+			messages = append(messages, data)
+			break
+		}
+
+		messages = append(messages, data[:maxBatchInputLogEventSize])
+		data = data[maxBatchInputLogEventSize:]
+	}
+
+	// Lock the mutex so we can queue our messages.
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	// Range over the messages and push them to the event list.
+	for _, m := range messages {
+		var tail *CloudWatchLogEventSlice
+
+		// Fetch the tail from the event list. If the message can be added to the
+		// tail add it. Otherwise push to the event list and add to the new tail.
+		if !c.logEventsList.IsEmpty() && c.logEventsList.GetTail().(*CloudWatchLogEventSlice).canAdd(m) {
+			tail = c.logEventsList.GetTail().(*CloudWatchLogEventSlice)
+		} else {
+			tail = &CloudWatchLogEventSlice{}
+			c.logEventsList.Push(tail)
+		}
+
+		tail.add(m)
+	}
+
+	return nil
+}
+
+// putLogs pops the oldest CloudWatchLogEventList off the queue, then
+// writes it to CloudWatch.
+func (c *CloudWatchLogger) putLogs() error {
+	if c.logEventsList.IsEmpty() {
+		return nil
+	}
+
+	if err := c.checkLogStream(); err != nil {
+		return err
+	}
+
+	elements := c.logEventsList.Pop().(*CloudWatchLogEventSlice).logEvents.GetElements()
+	inputLogEvents := make([]*cloudwatchlogs.InputLogEvent, len(elements))
+
+	for i, e := range elements {
+		inputLogEvents[i] = e.(*cloudwatchlogs.InputLogEvent)
+	}
+
+	input := &cloudwatchlogs.PutLogEventsInput{
+		LogEvents:     inputLogEvents,
+		LogGroupName:  c.logGroupName,
+		LogStreamName: aws.String(time.Now().Format("2006-01-02")),
+		SequenceToken: c.nextSequenceToken,
+	}
+
+	if err := input.Validate(); err != nil {
+		return err
+	}
+
+	output, err := c.cloudWatchLogs.PutLogEvents(input)
+
+	if err != nil {
+		var expectedSequenceToken *string
+
+		if aerr, ok := err.(*cloudwatchlogs.DataAlreadyAcceptedException); ok {
+			expectedSequenceToken = aerr.ExpectedSequenceToken
+		} else if aerr, ok := err.(*cloudwatchlogs.InvalidSequenceTokenException); ok {
+			expectedSequenceToken = aerr.ExpectedSequenceToken
+		}
+
+		if expectedSequenceToken != nil {
+			input.SequenceToken = expectedSequenceToken
+
+			output, err = c.cloudWatchLogs.PutLogEvents(input)
+
+			if err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+	}
+
+	c.nextSequenceToken = output.NextSequenceToken
+
+	return nil
 }
 
 // createLogStream creates a log stream in CloudWatch.
@@ -175,92 +288,4 @@ func (c *CloudWatchLogger) logStreamExists() (bool, error) {
 	}
 
 	return false, nil
-}
-
-// putLogs pops the oldest CloudWatchLogEventList off the queue, then
-// writes it to CloudWatch.
-func (c *CloudWatchLogger) putLogs() error {
-	if c.logEventsList.IsEmpty() {
-		return nil
-	}
-
-	if err := c.checkLogStream(); err != nil {
-		return err
-	}
-
-	elements := c.logEventsList.Pop().(*CloudWatchLogEventList).logEvents.GetElements()
-	inputLogEvents := make([]*cloudwatchlogs.InputLogEvent, len(elements))
-
-	for index, value := range elements {
-		inputLogEvents[index] = value.(*cloudwatchlogs.InputLogEvent)
-	}
-
-	input := &cloudwatchlogs.PutLogEventsInput{
-		LogEvents:     inputLogEvents,
-		LogGroupName:  c.logGroupName,
-		LogStreamName: aws.String(time.Now().Format("2006-01-02")),
-		SequenceToken: c.nextSequenceToken,
-	}
-
-	if err := input.Validate(); err != nil {
-		return err
-	}
-
-	output, err := c.cloudWatchLogs.PutLogEvents(input)
-
-	if err != nil {
-		var expectedSequenceToken *string
-
-		if aerr, ok := err.(*cloudwatchlogs.DataAlreadyAcceptedException); ok {
-			expectedSequenceToken = aerr.ExpectedSequenceToken
-		} else if aerr, ok := err.(*cloudwatchlogs.InvalidSequenceTokenException); ok {
-			expectedSequenceToken = aerr.ExpectedSequenceToken
-		}
-
-		if expectedSequenceToken != nil {
-			input.SequenceToken = expectedSequenceToken
-
-			output, err = c.cloudWatchLogs.PutLogEvents(input)
-
-			if err != nil {
-				return err
-			}
-		} else {
-			return err
-		}
-	}
-
-	c.nextSequenceToken = output.NextSequenceToken
-
-	return nil
-}
-
-// queue combines the globalFields and the passed fields, then
-// marshals them to JSON and finally adds it to a thread safe queue.
-func (c *CloudWatchLogger) queueLog(level string, fields Fields) error {
-	for key, value := range c.globalFields {
-		fields[key] = value
-	}
-
-	fields["level"] = level
-
-	data, err := json.Marshal(fields)
-	if err != nil {
-		return err
-	}
-
-	var tail *CloudWatchLogEventList
-
-	if c.logEventsList.IsEmpty() || !c.logEventsList.GetTail().(*CloudWatchLogEventList).canAdd(data) {
-		tail = &CloudWatchLogEventList{}
-		c.logEventsList.Push(&CloudWatchLogEventList{})
-	} else {
-		tail = c.logEventsList.GetTail().(*CloudWatchLogEventList)
-	}
-
-	if err := tail.add(string(data)); err != nil {
-		return err
-	}
-
-	return nil
 }
