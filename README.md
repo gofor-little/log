@@ -67,4 +67,4 @@ Ensure the following environment variables are set, usually with a .env file.
 * ```AWS_PROFILE``` (an AWS CLI profile name)
 * ```AWS_REGION``` (a valid AWS region)
 
-Run ```go test ./...``` in the root directory.
+Run ```go test -v -race ./...``` in the root directory.
