@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/gofor-little/env"
+	"github.com/stretchr/testify/require"
 
 	"github.com/gofor-little/log"
 )
@@ -29,43 +30,36 @@ func TestCloudWatchLogger(t *testing.T) {
 	} else {
 		sess, err = session.NewSession()
 	}
-	if err != nil {
-		t.Fatalf("failed to create new session.Session")
-	}
+	require.NoError(t, err)
 
 	log.Log, err = log.NewCloudWatchLogger(sess, "CloudWatchLoggerTest", log.Fields{
 		"tag": "cloudWatchLoggerTest",
 	})
-	if err != nil {
-		t.Fatalf("failed to create new CloudWatchLogger: %v", err)
-	}
+	require.NoError(t, err)
 
-	if err := log.Info(log.Fields{
+	err = log.Info(log.Fields{
 		"string": "test info string",
 		"bool":   true,
 		"int":    64,
 		"float":  3.14159,
-	}); err != nil {
-		t.Fatalf("failed to write Info log message")
-	}
+	})
+	require.NoError(t, err)
 
-	if err := log.Error(log.Fields{
+	err = log.Error(log.Fields{
 		"string": "test error string",
 		"bool":   true,
 		"int":    64,
 		"float":  3.14159,
-	}); err != nil {
-		t.Fatalf("failed to write Error log message")
-	}
+	})
+	require.NoError(t, err)
 
-	if err := log.Debug(log.Fields{
+	err = log.Debug(log.Fields{
 		"string": "test debug string",
 		"bool":   true,
 		"int":    64,
 		"float":  3.14159,
-	}); err != nil {
-		t.Fatalf("failed to write Debug log message")
-	}
+	})
+	require.NoError(t, err)
 
 	time.Sleep(time.Second)
 }
