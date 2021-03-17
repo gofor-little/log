@@ -26,38 +26,38 @@ import (
 func main() {
     // Standard logger writes to a user defined io.Writer.
     log.Log = log.NewStandardLogger(os.Stdout, log.Fields{
-	"tag": "standard_logger",
+	    "tag": "standard_logger",
     })
 
     // CloudWatch logger writes to an AWS CloudWatch log group.
     sess, err = session.NewSession()
     log.Log, err = log.NewCloudWatchLogger(sess, "CloudWatchLoggerTest", log.Fields{
-	"tag": "cloudWatchLoggerTest",
+	    "tag": "cloudWatchLoggerTest",
     })
     if err != nil {
-	panic(err)
+	    panic(err)
     }
 
     // Log at info, error and debug levels.
     log.Info(log.Fields{
-		"message": "info message",
-		"bool":   true,
-		"int":    64,
-		"float":  3.14159,
+        "message": "info message",
+        "bool":   true,
+        "int":    64,
+        "float":  3.14159,
     })
 
     log.Error(log.Fields{
-	"string": "error message",
-	"bool":   true,
-	"int":    64,
-	"float":  3.14159,
+        "string": "error message",
+        "bool":   true,
+        "int":    64,
+        "float":  3.14159,
     })
 
     log.Debug(log.Fields{
-	"string": "debug message",
-	"bool":   true,
-	"int":    64,
-	"float":  3.14159,
+        "string": "debug message",
+        "bool":   true,
+        "int":    64,
+        "float":  3.14159,
     })
 }
 ```
