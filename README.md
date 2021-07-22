@@ -31,7 +31,7 @@ func main() {
 
     // CloudWatch logger writes to an AWS CloudWatch log group.
     sess, err = session.NewSession()
-    log.Log, err = log.NewCloudWatchLogger(sess, "CloudWatchLoggerTest", log.Fields{
+    log.Log, err = log.NewCloudWatchLogger(context.Background(), os.Getenv("AWS_PROFILE"), os.Getenv("AWS_REGION"), "CloudWatchLoggerTest", log.Fields{
         "tag": "cloudWatchLoggerTest",
     })
     if err != nil {
