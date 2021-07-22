@@ -13,7 +13,10 @@ import (
 
 func TestCloudWatchLogger(t *testing.T) {
 	is := is.New(t)
-	is.NoErr(env.Load(".env"))
+
+	if err := env.Load(".env"); err != nil {
+		t.Log(".env file not found, ignore this if running in CI/CD Pipeline")
+	}
 
 	var err error
 	log.Log, err = log.NewCloudWatchLogger(context.Background(), env.Get("AWS_PROFILE", ""), env.Get("AWS_REGION", ""), "CloudWatchLoggerTest", log.Fields{
