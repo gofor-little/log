@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/cloudwatchlogs"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/types"
 	"github.com/gofor-little/ts"
 )
 
@@ -41,12 +41,9 @@ func (c *CloudWatchLogEventSlice) add(message []byte) error {
 	}
 
 	// Build and validate the InputLogEvent with a timestamp.
-	inputLogEvent := &cloudwatchlogs.InputLogEvent{
+	inputLogEvent := types.InputLogEvent{
 		Message:   aws.String(string(message)),
 		Timestamp: aws.Int64(time.Now().UnixNano() / int64(time.Millisecond)),
-	}
-	if err := inputLogEvent.Validate(); err != nil {
-		return err
 	}
 
 	// Adjust the size to accounting for the inputLogEventOffet.

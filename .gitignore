@@ -17,9 +17,8 @@ __debug_bin
 .idea/
 
 # Directories.
-bin/
 dist/
 node_modules/
 
-# Env files.
+# Files.
 *.env
