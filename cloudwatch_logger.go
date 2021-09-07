@@ -141,7 +141,9 @@ func (c *CloudWatchLogger) queueLog(level string, fields Fields) error {
 			c.logEventsList.Push(tail)
 		}
 
-		tail.add(m)
+		if err := tail.add(m); err != nil {
+			return err
+		}
 	}
 
 	return nil
