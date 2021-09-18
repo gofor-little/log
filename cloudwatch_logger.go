@@ -3,7 +3,9 @@ package log
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"log"
 	"sync"
 	"time"
 
@@ -42,7 +44,7 @@ func NewCloudWatchLogger(ctx context.Context, profile string, region string, log
 		return nil, fmt.Errorf("failed to load default config: %w", err)
 	}
 
-	log := &CloudWatchLogger{
+	logger := &CloudWatchLogger{
 		currentDay:     time.Now().Day(),
 		cloudWatchLogs: cloudwatchlogs.NewFromConfig(cfg),
 		logEventsList:  &ts.LinkedList{},
@@ -50,23 +52,24 @@ func NewCloudWatchLogger(ctx context.Context, profile string, region string, log
 		globalFields:   globalFields,
 	}
 
-	if err := log.checkLogGroup(ctx); err != nil {
+	if err := logger.checkLogGroup(ctx); err != nil {
 		return nil, err
 	}
 
 	go func() {
 		//lint:ignore SA1015 This is an endless function.
+		//nolint:staticcheck // GolangCI Lint.
 		throttle := time.Tick(time.Second / 5)
 
 		for {
 			<-throttle
-			if err := log.putLogs(ctx); err != nil {
-				fmt.Printf("failed to send logs to CloudWatch: %v", err)
+			if err := logger.putLogs(ctx); err != nil {
+				log.Fatalf("failed to send logs to CloudWatch: %v", err)
 			}
 		}
 	}()
 
-	return log, nil
+	return logger, nil
 }
 
 // Info writes a log message at an info level.
@@ -175,21 +178,19 @@ func (c *CloudWatchLogger) putLogs(ctx context.Context) error {
 	}
 
 	output, err := c.cloudWatchLogs.PutLogEvents(ctx, input)
-
 	if err != nil {
-		var expectedSequenceToken *string
+		var dataAlreadyAccepted *types.DataAlreadyAcceptedException
+		var invalidSequenceToken *types.InvalidSequenceTokenException
 
-		if aerr, ok := err.(*types.DataAlreadyAcceptedException); ok {
-			expectedSequenceToken = aerr.ExpectedSequenceToken
-		} else if aerr, ok := err.(*types.InvalidSequenceTokenException); ok {
-			expectedSequenceToken = aerr.ExpectedSequenceToken
-		}
-
-		if expectedSequenceToken != nil {
-			input.SequenceToken = expectedSequenceToken
-
+		if errors.As(err, &dataAlreadyAccepted) {
+			input.SequenceToken = dataAlreadyAccepted.ExpectedSequenceToken
 			output, err = c.cloudWatchLogs.PutLogEvents(ctx, input)
-
+			if err != nil {
+				return err
+			}
+		} else if errors.As(err, &invalidSequenceToken) {
+			input.SequenceToken = dataAlreadyAccepted.ExpectedSequenceToken
+			output, err = c.cloudWatchLogs.PutLogEvents(ctx, input)
 			if err != nil {
 				return err
 			}
