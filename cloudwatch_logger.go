@@ -184,19 +184,19 @@ func (c *CloudWatchLogger) putLogs(ctx context.Context) error {
 
 		if errors.As(err, &dataAlreadyAccepted) {
 			input.SequenceToken = dataAlreadyAccepted.ExpectedSequenceToken
-			output, err = c.cloudWatchLogs.PutLogEvents(ctx, input)
+			_, err = c.cloudWatchLogs.PutLogEvents(ctx, input)
 			if err != nil {
 				return err
 			}
 		} else if errors.As(err, &invalidSequenceToken) {
-			input.SequenceToken = dataAlreadyAccepted.ExpectedSequenceToken
-			output, err = c.cloudWatchLogs.PutLogEvents(ctx, input)
+			input.SequenceToken = invalidSequenceToken.ExpectedSequenceToken
+			_, err = c.cloudWatchLogs.PutLogEvents(ctx, input)
 			if err != nil {
 				return err
 			}
-		} else {
-			return err
 		}
+
+		return err
 	}
 
 	c.nextSequenceToken = output.NextSequenceToken
