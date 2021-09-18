@@ -57,12 +57,10 @@ func NewCloudWatchLogger(ctx context.Context, profile string, region string, log
 	}
 
 	go func() {
-		//lint:ignore SA1015 This is an endless function.
-		//nolint:staticcheck // GolangCI Lint.
-		throttle := time.Tick(time.Second / 5)
+		ticker := time.NewTicker(time.Second / 5)
 
 		for {
-			<-throttle
+			<-ticker.C
 			if err := logger.putLogs(ctx); err != nil {
 				log.Fatalf("failed to send logs to CloudWatch: %v", err)
 			}
