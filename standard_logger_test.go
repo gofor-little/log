@@ -1,6 +1,7 @@
 package log_test
 
 import (
+	"errors"
 	"os"
 	"testing"
 
@@ -26,6 +27,7 @@ func TestLog(t *testing.T) {
 		"bool":   true,
 		"int":    64,
 		"float":  3.14159,
+		"error":  errors.New("test-error"),
 	}); err != nil {
 		t.Fatalf("failed to write Error log message")
 	}

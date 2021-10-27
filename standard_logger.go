@@ -46,8 +46,14 @@ func (l *StandardLogger) Debug(fields Fields) error {
 // marshals them to JSON. A new line character is then added to the end
 // of the message and finally written to the output.
 func (l *StandardLogger) write(fields Fields) error {
-	for key, value := range l.globalFields {
-		fields[key] = value
+	for k, v := range l.globalFields {
+		fields[k] = v
+	}
+
+	for k := range fields {
+		if err, ok := fields[k].(error); ok {
+			fields[k] = err.Error()
+		}
 	}
 
 	fields["time"] = time.Now().Format("2006-01-02 15:04:05")
