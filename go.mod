@@ -3,7 +3,7 @@ module github.com/gofor-little/log
 go 1.17
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.13.0
+	github.com/aws/aws-sdk-go-v2 v1.14.0
 	github.com/aws/aws-sdk-go-v2/config v1.13.1
 	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.13.0
 	github.com/gofor-little/env v1.0.3
@@ -20,5 +20,5 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.7.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.9.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.14.0 // indirect
-	github.com/aws/smithy-go v1.10.0 // indirect
+	github.com/aws/smithy-go v1.11.0 // indirect
 )
