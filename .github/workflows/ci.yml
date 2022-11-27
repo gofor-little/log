@@ -33,7 +33,7 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: ap-southeast-2
-          role-to-assume: arn:aws:iam::320045747480:role/github-actions-gofor-little-log
+          role-to-assume: arn:aws:iam::320045747480:role/github-actions
       - run: |
           go get -v -t -d ./...
       - run: |
