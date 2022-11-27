@@ -2,9 +2,11 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
     
 permissions:
   contents: read
@@ -13,32 +15,24 @@ permissions:
 jobs:
   lint:
     name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: golangci/golangci-lint-action@v3
-
-  security-check:
-    name: Security Check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: securego/gosec@master
-        with:
-          args: ./...
+    uses: gofor-little/github-actions/.github/workflows/golang-lint.yaml@main
   test:
     name: Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
-        with:
-          go-version: ^1.17
-      - uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-region: ap-southeast-2
-          role-to-assume: arn:aws:iam::320045747480:role/github-actions
-      - run: |
-          go get -v -t -d ./...
-      - run: |
-          go test -v -race ./...
+    uses: gofor-little/github-actions/.github/workflows/golang-test.yaml@main
+  bump-tag:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs:
+      - lint
+      - test
+    name: Bump Tag
+    uses: gofor-little/github-actions/.github/workflows/bump-tag.yaml@main
+  release:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs:
+      - bump-tag
+    name: Release
+    uses: strongishllama/github-actions/.github/workflows/github-release.yaml@main
+    with:
+      tag: ${{ needs.bump-tag.outputs.bumped-tag }}
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
