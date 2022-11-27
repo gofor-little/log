@@ -24,7 +24,7 @@ jobs:
       - lint
       - test
     name: Bump Tag
-    uses: gofor-little/github-actions/.github/workflows/bump-tag.yaml@main
+    uses: gofor-little/github-actions/.github/workflows/bump-tag.yaml@090728f42bbde78e55e123008666cd97a1b4ab5d
   release:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs:
