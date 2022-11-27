@@ -19,6 +19,8 @@ jobs:
   test:
     name: Test
     uses: gofor-little/github-actions/.github/workflows/golang-test.yaml@main
+    with:
+      aws-role: arn:aws:iam::320045747480:role/github-actions
   bump-tag:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs:
