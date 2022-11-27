@@ -1,15 +1,13 @@
 name: Security Scan
-
 on:
   schedule:
     - cron: 0 0 * * *
-
 jobs:
   security-check:
     name: Security Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: securego/gosec@master
+      - uses: securego/gosec@v2.14.0
         with:
           args: ./...
