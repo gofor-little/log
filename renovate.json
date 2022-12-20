@@ -1,20 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    ":automergePatch",
-    ":automergeDigest",
-    ":automergePr",
-    "config:base",
-    ":gomod",
-    "group:allNonMajor"
-  ],
-  "packageRules": [
-    {
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "automerge": true
-    }
-  ],
-  "postUpdateOptions": [
-    "gomodTidy1.17"
+      "local>gofor-little/renovate-config"
   ]
 }
